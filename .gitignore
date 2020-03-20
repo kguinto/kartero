@@ -1,0 +1,10 @@
+
+**/*.rs.bk
+.DS_Store
+
+/target
+
+/static/**
+!/static/.gitkeep
+
+app/node_modules
