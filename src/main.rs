@@ -1,5 +1,15 @@
 use rust_embed::RustEmbed;
+
+use serde::{Deserialize, Serialize};
+use serde_json;
+
 use web_view::*;
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Invocation {
+    method: String,
+    args: Vec<String>,
+}
 
 #[derive(RustEmbed)]
 #[folder = "static/"]
@@ -32,7 +42,22 @@ fn main() {
         .size(480, 640)
         .resizable(true)
         .user_data(())
-        .invoke_handler(|_webview, _arg| Ok(()))
+        .invoke_handler(|_webview, arg| {
+            println!("invoking");
+
+            let inv: Invocation = serde_json::from_str(&arg).expect("Could not parse JSON");
+
+            println!("inv: {:?}", inv);
+
+            match &inv.method[..] {
+                "log" => {
+                    println!("{}", inv.args.join(" "));
+                }
+                _ => println!("unimplemented"),
+            }
+
+            Ok(())
+        })
         .run()
         .unwrap();
 }

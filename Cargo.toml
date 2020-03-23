@@ -5,7 +5,9 @@ authors = ["Kirk Louie Guinto <kirklouieguinto@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-web-view = "0.5.3"
+web-view = "0.6.2"
 hyper="0.12"
 rust-embed = "5.1.0"
 futures = "0.1"
+serde_json = "1.0.48"
+serde = { version = "1.0.105", features = ["derive"]}
