@@ -11,6 +11,8 @@ const App = () => {
       typeof a === 'string' ? a : JSON.stringify(a)
     );
 
+    window.setResponse = res => setResponse(res);
+
     window?.external?.invoke(
       JSON.stringify({
         method: method,
@@ -20,9 +22,12 @@ const App = () => {
   };
 
   const log = (...args) => invoke('log', ...args);
+  const http = (...args) => invoke('http', ...args);
 
   const onSubmit = ({ method, url }) => {
     log('submitting', { method, url });
+
+    http(method, url);
   };
 
   return (
@@ -32,8 +37,11 @@ const App = () => {
       {response && (
         <pre
           css={css`
+            height: 100%;
             border: 1px solid lightgray;
             padding: 4px;
+
+            overflow: scroll;
           `}
         >
           {response}

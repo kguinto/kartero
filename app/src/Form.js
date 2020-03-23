@@ -24,8 +24,8 @@ const Form = ({ onSubmit }) => {
           if (e?.target?.value) setMethod(e?.target?.value);
         }}
       >
-        <option value="get">{'GET'}</option>
-        <option value="post">{'POST'}</option>
+        <option value="GET">{'GET'}</option>
+        <option value="POST">{'POST'}</option>
       </select>
       <input
         type="text"
