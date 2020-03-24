@@ -8,7 +8,24 @@
     "removeComments": true,
     "sourceMap": false,
     "allowJs": true,
-    "jsx": "react"
+    "jsx": "react",
+    "lib": ["es5", "es2015", "dom"]
+  },
+  "awesomeTypescriptLoaderOptions": {
+    "useBabel": true,
+    "babelOptions": {
+      "babelrc": false,
+      "presets": [
+        "@babel/preset-typescript",
+        "@babel/preset-env",
+        "@babel/preset-react"
+      ],
+      "plugins": [
+        "babel-plugin-styled-components",
+        "@babel/plugin-proposal-optional-chaining"
+      ]
+    },
+    "babelCore": "@babel/core"
   },
   "include": ["./src/**/*"]
 }

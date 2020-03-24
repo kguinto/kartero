@@ -46,19 +46,28 @@ fn main() {
             <title>App</title>
             <script>
                 window.console.log = function (...args) {{
+                    const stringifiedArgs = args.map(a =>
+                        typeof a === 'string' ? a : JSON.stringify(a)
+                      );
+                  
+
                     external.invoke(
                         JSON.stringify({{
                             method: 'log',
-                            args
+                            args: stringifiedArgs
                         }})
                     );
                 }};
 
                 window.console.error = function (...args) {{
+                    const stringifiedArgs = args.map(a =>
+                        typeof a === 'string' ? a : JSON.stringify(a)
+                      );
+
                     external.invoke(
                         JSON.stringify({{
                             method: 'error',
-                            args
+                            args: stringifiedArgs
                         }})
                     );
                 }};
@@ -68,8 +77,6 @@ fn main() {
         <body>
             <div id="app">You need JavaScript enabled to view this content.</div>
             <script>
-            console.log("hello");
-            console.error("error");
 
             try {{
                 {js}

@@ -2,29 +2,17 @@ import * as React from 'react';
 import { Component, useEffect, useState } from 'react';
 import { css } from 'styled-components';
 
-import Form from './Form.tsx';
-
-declare global {
-  interface Window {
-    setResponse: (string) => void;
-  }
-}
-
-declare global {
-  interface External {
-    invoke: (string) => void;
-  }
-}
+import Form from './Form';
 
 const App = (): Component => {
   const [response, setResponse] = useState();
 
-  const invoke = (method, ...args): void => {
+  const invoke = (method, args): void => {
     const stringifiedArgs = args.map(a =>
       typeof a === 'string' ? a : JSON.stringify(a)
     );
 
-    window?.external?.invoke(
+    window['external']['invoke'](
       JSON.stringify({
         method: method,
         args: stringifiedArgs,
@@ -33,14 +21,13 @@ const App = (): Component => {
   };
 
   useEffect(() => {
-    window.setResponse = (res: string): void => setResponse(res);
+    window['setResponse'] = (res: string): void => setResponse(res);
   }, []);
 
-  const log = (...args): void => invoke('log', ...args);
-  const http = (...args): void => invoke('http', ...args);
+  const http = (method, url): void => invoke('http', [method, url]);
 
   const onSubmit = ({ method, url }): void => {
-    log('submitting', { method, url });
+    console.log('submitting', { method, url });
 
     http(method, url);
   };
