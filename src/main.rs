@@ -44,11 +44,38 @@ fn main() {
         <html>
         <head>
             <title>App</title>
+            <script>
+                window.console.log = function (...args) {{
+                    external.invoke(
+                        JSON.stringify({{
+                            method: 'log',
+                            args
+                        }})
+                    );
+                }};
+
+                window.console.error = function (...args) {{
+                    external.invoke(
+                        JSON.stringify({{
+                            method: 'error',
+                            args
+                        }})
+                    );
+                }};
+
+            </script>
         </head>
         <body>
             <div id="app">You need JavaScript enabled to view this content.</div>
             <script>
-            {js}
+            console.log("hello");
+            console.error("error");
+
+            try {{
+                {js}
+            }} catch (err) {{
+                console.error(err.toString());
+            }}
             </script>
         </body>
         </html>
@@ -67,7 +94,10 @@ fn main() {
 
             match &inv.method[..] {
                 "log" => {
-                    println!("JS: {}", inv.args.join(" "));
+                    println!("JS log: {}", inv.args.join(" "));
+                }
+                "error" => {
+                    println!("JS error: {}", inv.args.join(" "));
                 }
                 "http" => {
                     let response = match handle_http(inv.args) {

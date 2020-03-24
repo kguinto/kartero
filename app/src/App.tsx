@@ -1,17 +1,28 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import { Component, useEffect, useState } from 'react';
 import { css } from 'styled-components';
 
-import Form from './Form';
+import Form from './Form.tsx';
 
-const App = () => {
+declare global {
+  interface Window {
+    setResponse: (string) => void;
+  }
+}
+
+declare global {
+  interface External {
+    invoke: (string) => void;
+  }
+}
+
+const App = (): Component => {
   const [response, setResponse] = useState();
 
-  const invoke = (method, ...args) => {
-    let stringifiedArgs = args.map(a =>
+  const invoke = (method, ...args): void => {
+    const stringifiedArgs = args.map(a =>
       typeof a === 'string' ? a : JSON.stringify(a)
     );
-
-    window.setResponse = res => setResponse(res);
 
     window?.external?.invoke(
       JSON.stringify({
@@ -21,10 +32,14 @@ const App = () => {
     );
   };
 
-  const log = (...args) => invoke('log', ...args);
-  const http = (...args) => invoke('http', ...args);
+  useEffect(() => {
+    window.setResponse = (res: string): void => setResponse(res);
+  }, []);
 
-  const onSubmit = ({ method, url }) => {
+  const log = (...args): void => invoke('log', ...args);
+  const http = (...args): void => invoke('http', ...args);
+
+  const onSubmit = ({ method, url }): void => {
     log('submitting', { method, url });
 
     http(method, url);
