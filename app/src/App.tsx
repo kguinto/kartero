@@ -8,7 +8,7 @@ const App = (): Component => {
   const [response, setResponse] = useState();
 
   const invoke = (method, args): void => {
-    const stringifiedArgs = args.map(a =>
+    const stringifiedArgs = args.map((a) =>
       typeof a === 'string' ? a : JSON.stringify(a)
     );
 
@@ -24,16 +24,26 @@ const App = (): Component => {
     window['setResponse'] = (res: string): void => setResponse(res);
   }, []);
 
-  const http = (method, url): void => invoke('http', [method, url]);
+  const onSubmit = ({ method, url, headers }): void => {
+    console.log('submitting', { method, url, headers });
 
-  const onSubmit = ({ method, url }): void => {
-    console.log('submitting', { method, url });
-
-    http(method, url);
+    invoke('http', [method, url, JSON.stringify(headers)]);
   };
 
   return (
-    <div>
+    <div
+      css={css`
+        height: 100%;
+        width: 100%;
+        padding: 0.5em;
+
+        box-sizing: border-box;
+        overflow: hidden;
+
+        font-family: sans-serif;
+        font-size: 12px;
+      `}
+    >
       <Form onSubmit={onSubmit} />
 
       {response && (

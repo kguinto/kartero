@@ -3,6 +3,7 @@ use reqwest;
 use rust_embed::RustEmbed;
 use serde::{Deserialize, Serialize};
 use serde_json;
+use std::collections::HashMap;
 use web_view::*;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -24,9 +25,35 @@ fn handle_http(args: Vec<String>) -> Result<String, Box<dyn std::error::Error>> 
 
             let url = &args[1];
 
-            let resp = reqwest::blocking::get(url)?.text()?;
+            let mut stringified_headers = &String::from("");
 
-            return Ok(resp);
+            stringified_headers = match args.len() >= 2 {
+                true => &args[2],
+                false => stringified_headers,
+            };
+
+            let parsed_headers: Vec<HashMap<String, String>> =
+                serde_json::from_str(&stringified_headers).expect("Could not parse headers");
+
+            let client = reqwest::blocking::Client::new();
+
+            let mut req = client.get(url);
+
+            for parsed_header in parsed_headers.iter() {
+                let header_name = parsed_header
+                    .get("name")
+                    .expect("Could not get header name");
+
+                let header_value = parsed_header
+                    .get("value")
+                    .expect("Could not get header value");
+
+                req = req.header(header_name, header_value);
+            }
+
+            let res = req.send()?.text()?;
+
+            return Ok(res);
         }
         "POST" => println!("POST {:?}", &args[1..]),
         _ => unimplemented!(),
@@ -40,8 +67,10 @@ fn main() {
 
     let index_html = format!(
         r#"
-            <!DOCTYPE html>
-        <html>
+        <!DOCTYPE html>
+        <html
+            style="height: 100%; width: 100%; overflow: hidden; box-sizing: border-box; padding: 0; margin: 0;"
+        >
         <head>
             <title>App</title>
             <script>
@@ -74,7 +103,9 @@ fn main() {
 
             </script>
         </head>
-        <body>
+        <body
+            style="height: 100%; width: 100%; overflow: hidden; box-sizing: border-box; padding: 0; margin: 0;"
+        >
             <div id="app">You need JavaScript enabled to view this content.</div>
             <script>
 

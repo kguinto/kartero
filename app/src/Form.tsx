@@ -2,9 +2,14 @@ import * as React from 'react';
 import { Component, useState } from 'react';
 import { css } from 'styled-components';
 
+import HeaderInputGroup from './HeaderInputGroup';
+import useHeaderGroup from './useHeaderGroup';
+
 const Form = ({ onSubmit }): Component => {
   const [method, setMethod] = useState('GET');
   const [url, setUrl] = useState('');
+
+  const [headerList, setHeader, removeHeader] = useHeaderGroup();
 
   return (
     <form
@@ -15,7 +20,11 @@ const Form = ({ onSubmit }): Component => {
       onSubmit={(e): void => {
         e?.preventDefault?.();
 
-        onSubmit?.({ method, url });
+        const headers = headerList.filter(
+          ({ name, value }) => name !== '' && value !== ''
+        );
+
+        onSubmit?.({ method, url, headers });
       }}
     >
       <div
@@ -47,6 +56,14 @@ const Form = ({ onSubmit }): Component => {
         />
         <button type="submit">{'Go'}</button>
       </div>
+      <HeaderInputGroup
+        css={css`
+          margin-top: 1em;
+        `}
+        headerList={headerList}
+        setHeader={setHeader}
+        removeHeader={removeHeader}
+      />
     </form>
   );
 };
