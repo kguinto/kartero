@@ -3,31 +3,19 @@ import { Component, useEffect, useState } from 'react';
 import { css } from 'styled-components';
 
 import Form from './Form';
+import invoke from './invoke';
 
 const App = (): Component => {
   const [response, setResponse] = useState();
-
-  const invoke = (method, args): void => {
-    const stringifiedArgs = args.map((a) =>
-      typeof a === 'string' ? a : JSON.stringify(a)
-    );
-
-    window['external']['invoke'](
-      JSON.stringify({
-        method: method,
-        args: stringifiedArgs,
-      })
-    );
-  };
 
   useEffect(() => {
     window['setResponse'] = (res: string): void => setResponse(res);
   }, []);
 
-  const onSubmit = ({ method, url, headers }): void => {
+  const onSubmit = ({ method, url, headers, body }): void => {
     console.log('submitting', { method, url, headers });
 
-    invoke('http', [method, url, JSON.stringify(headers)]);
+    invoke('http', [method, url, JSON.stringify(headers), body]);
   };
 
   return (

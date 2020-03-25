@@ -1,5 +1,5 @@
 use chrono;
-use reqwest;
+use reqwest::Method;
 use rust_embed::RustEmbed;
 use serde::{Deserialize, Serialize};
 use serde_json;
@@ -17,49 +17,46 @@ struct Invocation {
 struct Asset;
 
 fn handle_http(args: Vec<String>) -> Result<String, Box<dyn std::error::Error>> {
-    let method = &args[0];
+    let method = match &args[0][..] {
+        "GET" => Method::GET,
+        "POST" => Method::POST,
+        _ => Method::GET,
+    };
 
-    match &method[..] {
-        "GET" => {
-            println!("GET {:?} {}", &args[1..], chrono::Utc::now());
+    let url = &args[1];
+    println!("{:?} {:?} {}", method, url, chrono::Utc::now());
 
-            let url = &args[1];
+    let mut stringified_headers = &String::from("");
 
-            let mut stringified_headers = &String::from("");
+    stringified_headers = match args.len() >= 2 {
+        true => &args[2],
+        false => stringified_headers,
+    };
 
-            stringified_headers = match args.len() >= 2 {
-                true => &args[2],
-                false => stringified_headers,
-            };
+    let parsed_headers: Vec<HashMap<String, String>> =
+        serde_json::from_str(&stringified_headers).expect("Could not parse headers");
 
-            let parsed_headers: Vec<HashMap<String, String>> =
-                serde_json::from_str(&stringified_headers).expect("Could not parse headers");
+    let client = reqwest::blocking::Client::new();
 
-            let client = reqwest::blocking::Client::new();
+    let mut req = client.request(method, url);
 
-            let mut req = client.get(url);
+    for parsed_header in parsed_headers.iter() {
+        let header_name = parsed_header
+            .get("name")
+            .expect("Could not get header name");
 
-            for parsed_header in parsed_headers.iter() {
-                let header_name = parsed_header
-                    .get("name")
-                    .expect("Could not get header name");
+        let header_value = parsed_header
+            .get("value")
+            .expect("Could not get header value");
 
-                let header_value = parsed_header
-                    .get("value")
-                    .expect("Could not get header value");
-
-                req = req.header(header_name, header_value);
-            }
-
-            let res = req.send()?.text()?;
-
-            return Ok(res);
-        }
-        "POST" => println!("POST {:?}", &args[1..]),
-        _ => unimplemented!(),
+        req = req.header(header_name, header_value);
     }
 
-    Ok("".to_string())
+    req = req.body(reqwest::blocking::Body::from(args[3].clone()));
+
+    let res = req.send()?.text()?;
+
+    return Ok(res);
 }
 
 fn main() {
@@ -89,9 +86,9 @@ fn main() {
                 }};
 
                 window.console.error = function (...args) {{
-                    const stringifiedArgs = args.map(a =>
-                        typeof a === 'string' ? a : JSON.stringify(a)
-                      );
+                    const stringifiedArgs = args.map(a => (
+                        typeof a === 'string' ? a : a.toString()
+                    ));
 
                     external.invoke(
                         JSON.stringify({{
