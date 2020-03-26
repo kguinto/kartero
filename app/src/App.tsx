@@ -9,7 +9,15 @@ const App = (): Component => {
   const [response, setResponse] = useState();
 
   useEffect(() => {
-    window['setResponse'] = (res: string): void => setResponse(res);
+    window['setResponse'] = (res: string): void => {
+      try {
+        const parsedRes = JSON.parse(res);
+
+        setResponse(JSON.stringify(parsedRes, null, 2));
+      } catch {
+        setResponse(res);
+      }
+    };
   }, []);
 
   const onSubmit = ({ method, url, headers, body }): void => {
@@ -21,8 +29,11 @@ const App = (): Component => {
   return (
     <div
       css={css`
-        height: 100%;
-        width: 100%;
+        display: flex;
+        flex-direction: column;
+
+        height: 100vh;
+        width: 100vw;
         padding: 0.5em;
 
         box-sizing: border-box;
@@ -37,7 +48,9 @@ const App = (): Component => {
       {response && (
         <pre
           css={css`
+            display: flex;
             height: 100%;
+
             border: 1px solid lightgray;
             padding: 4px;
 
